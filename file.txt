@@ -1,1 +1,1 @@
-Adding file.txt file to commit
+Changing file.txt file to commit
