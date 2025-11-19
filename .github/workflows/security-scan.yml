@@ -1,0 +1,41 @@
+name: TITAN Security Scan
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: Run Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Run TITAN Security Scan
+        uses: titanfyp/titan-ci-tool@v1.0.0
+        with:
+          api_base_url: ${{ secrets.TITAN_API_BASE_URL }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          report_format: 'pdf'
+          timeout_seconds: 600
+          blocking: true
+          block_percentage: 25
+      
+      - name: Security scan summary
+        if: failure()
+        run: |
+          echo "Security scan completed but found vulnerabilities above threshold"
+          echo "Review the security report to identify and fix the issues"
+      
+      - name: Upload security report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: security_report.*
+          retention-days: 30
